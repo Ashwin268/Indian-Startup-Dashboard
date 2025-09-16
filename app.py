@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 
+st.set_page_config(layout="wide",page_title="Startup Analysis")
 df = pd.read_csv('startup_cleaned.csv')
 
 def loadInvestorDetails(Investor):
@@ -24,7 +25,47 @@ def loadInvestorDetails(Investor):
         plt.xticks(rotation=45, ha='right')
         st.pyplot(fig)
 
-    # with col2:
+    with col2:
+        st.subheader('Sectors Invested on')
+        filtered = df[df['Investor'].str.contains(Investor, na=False)]
+
+        if filtered.empty:
+            st.warning(f"No data found for investor: {Investor}")
+        else:
+            verticals = filtered.groupby('Vertical')['Amount in Cr'].sum()
+            if verticals.empty or verticals.sum() == 0:
+                st.info(f"{Investor} has not invested anything.")
+            else:
+                fig1, ax1 = plt.subplots()
+                ax1.pie(verticals, labels=verticals.index, autopct='%1.1f%%')
+                st.pyplot(fig1)
+
+    col3, col4 = st.columns(2)
+    with col3:
+        st.subheader('Stages Invested on')
+        if filtered.empty:
+            st.warning(f"No data found for investor: {Investor}")
+        else:
+            round = filtered.groupby('Round')['Amount in Cr'].sum()
+            if round.empty or round.sum() == 0:
+                st.info(f"{Investor} has not invested anything.")
+            else:
+                fig1, ax1 = plt.subplots()
+                ax1.pie(round, labels=round.index, autopct='%1.1f%%')
+                st.pyplot(fig1)
+
+    with col4:
+        st.subheader('Cities Invested on')
+        if filtered.empty:
+            st.warning(f"No data found for investor: {Investor}")
+        else:
+            cities = filtered.groupby('City')['Amount in Cr'].sum()
+            if cities.empty or cities.sum() == 0:
+                st.info(f"{Investor} has not invested anything.")
+            else:
+                fig1, ax1 = plt.subplots()
+                ax1.pie(cities, labels=cities.index, autopct='%1.1f%%')
+                st.pyplot(fig1)
 
 st.sidebar.title('Startup Funding Analysis Dashboard')
 option = st.sidebar.selectbox('select one', ['Overall Analysis','StartUp', 'Investors'])
